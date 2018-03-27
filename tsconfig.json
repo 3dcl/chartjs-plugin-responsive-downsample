@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {    
+    "target": "es5",
+    "noImplicitAny": true,
+    "sourceMap": false,
+    "declaration": true,
+    "outDir": "dist",
+    "module": "commonjs",
+    "lib": [
+      "dom",
+      "es6"
+    ]
+  },
+  "include": [
+    "src"
+  ]
+}

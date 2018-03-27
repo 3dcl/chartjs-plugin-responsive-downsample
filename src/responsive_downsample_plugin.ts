@@ -43,8 +43,7 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
       enabled: false,
       aggregationAlgorithm: 'LTTB',
       desiredDataPointDistance: 1,
-      minNumPoints: 100,
-      needsUpdate: true
+      minNumPoints: 100
     });
 
     if (options.enabled) {
@@ -82,8 +81,8 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
 
     if (utils.isNil(xScale)) return null;
 
-    const start: moment.Moment = xScale.getValueForPixel(xScale.left) as any;
-    const end: moment.Moment = xScale.getValueForPixel(xScale.left + 1) as any;
+    let start: moment.Moment = moment(xScale.getValueForPixel(xScale.left) as any);
+    let end: moment.Moment = moment(xScale.getValueForPixel(xScale.left + 1) as any);
     const targetResolution = end.diff(start);
 
     return targetResolution * options.desiredDataPointDistance;

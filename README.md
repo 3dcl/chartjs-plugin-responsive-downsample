@@ -2,6 +2,8 @@
 A chart.js plugin to dynamically downsample line chart data depending on the chart resolution.
 The plugin creates a mipmap-like data structure from line chart data and dynamically choses a downsampled version of the data depending on the chart resolution and x axis scale.
 
+Inspired by: [AlbinoDrought/chartjs-plugin-downsample](https://github.com/AlbinoDrought/chartjs-plugin-downsample)
+
 ### Configuration
 ```javascript
 {

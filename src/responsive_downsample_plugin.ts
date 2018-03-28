@@ -1,5 +1,5 @@
 import moment_module = require('moment');
-const moment = (window as any).moment ? (window as any).moment : moment_module;
+const moment = (window && (window as any).moment) ? (window as any).moment : moment_module;
 import { Chart } from 'chart.js';
 import { IChartPlugin, TimeScale } from './chartjs_ext';
 import * as utils from './utils';

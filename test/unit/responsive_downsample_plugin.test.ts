@@ -1,3 +1,4 @@
+global.window = {};
 import mocha = require('mocha');
 import chai = require('chai');
 import chai_datatime = require('chai-datetime');

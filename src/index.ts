@@ -1,5 +1,5 @@
 import chartjs = require('chart.js');
-const Chart = (window as any).Chart ? (window as any).Chart : chartjs.Chart;
+const Chart = window && (window as any).Chart ? (window as any).Chart : chartjs.Chart;
 
 import { ResponsiveDownsamplePlugin, ResponsiveDownsamplePluginOptions } from './responsive_downsample_plugin';
 export { ResponsiveDownsamplePlugin, ResponsiveDownsamplePluginOptions } from './responsive_downsample_plugin';

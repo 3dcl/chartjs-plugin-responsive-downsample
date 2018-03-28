@@ -1,3 +1,4 @@
+global.window = {};
 import mocha = require('mocha');
 import chai = require('chai');
 import chai_datatime = require('chai-datetime');
@@ -74,6 +75,13 @@ describe('DataMipMap', function () {
             expect(mipMapLevel).to.have.length(2);
             checkMipMaps(mipMapLevel, 60000);
         });
+
+        it('should handle an empty dataset', function () {
+            const mipMap = new DataMipmap([]);
+            const mipMapLevel = mipMap.getMipMaps();
+
+            expect(mipMapLevel).to.have.length(1);
+        });
     });
 
     describe('setData', function () {
@@ -123,6 +131,16 @@ describe('DataMipMap', function () {
             expect(mipMap.getMipMapForResolution(480000)).to.equal(mipMapLevel[3]);
             expect(mipMap.getMipMapForResolution(10000000)).to.equal(mipMapLevel[6]);
             expect(mipMap.getMipMapForResolution(10000000000)).to.equal(mipMapLevel[6]);
+        });
+
+        it('should return an empty level for empty dataset', function () {
+            const mipMap = new DataMipmap([]);
+            const mipMapLevel = mipMap.getMipMaps();
+
+            expect(mipMap.getMipMapForResolution(1)).to.equal(mipMapLevel[0]);
+            expect(mipMap.getMipMapForResolution(60000)).to.equal(mipMapLevel[0]);
+            expect(mipMap.getMipMapForResolution(100000)).to.equal(mipMapLevel[0]);
+            expect(mipMap.getMipMapForResolution(120000)).to.equal(mipMapLevel[0]);
         });
     });
 });

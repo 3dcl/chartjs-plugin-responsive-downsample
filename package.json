@@ -1,13 +1,13 @@
 {
   "name": "chartjs-plugin-responsive-downsample",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A chart.js plugin to dynamically downsample line chart data depending on the chart resolution.",
   "files": [
     "dist"
   ],
-  "main": "./dist/index.js",
-  "browser": "./dist/chartjs-plugin-responsive-downsample.bundle.js",
-  "types": "./dist/index.d.ts",
+  "main": "dist/index.js",
+  "browser": "dist/chartjs-plugin-responsive-downsample.bundle.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "prepublish": "npm run build && npm run build-browser && npm run build-browser-min",
     "build": "tsc",

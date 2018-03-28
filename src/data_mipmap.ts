@@ -69,6 +69,13 @@ export class DataMipmap {
     return this.mipMaps;
   }
 
+  /**
+   * Get the number of available mipmap level
+   */
+  getNumLevel(): number {
+    return this.mipMaps.length;
+  }
+
   protected computeResolution(data: ChartPoint[]): number {
     let minTimeDistance = Infinity;
 

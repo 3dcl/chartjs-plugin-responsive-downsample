@@ -1,5 +1,6 @@
-import moment = require('moment');
-import { Chart, ChartPoint } from 'chart.js';
+import moment_module = require('moment');
+const moment = (window as any).moment ? (window as any).moment : moment_module;
+import { Chart } from 'chart.js';
 import { IChartPlugin, TimeScale } from './chartjs_ext';
 import * as utils from './utils';
 
@@ -73,6 +74,7 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
 
       dataset.originalData = data;
       dataset.mipMap = mipMap;
+      dataset.data = mipMap.getMipMapLevel(mipMap.getNumLevel() - 1); // set last level for first render pass
     });
   }
 
@@ -81,8 +83,8 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
 
     if (utils.isNil(xScale)) return null;
 
-    let start: moment.Moment = moment(xScale.getValueForPixel(xScale.left) as any);
-    let end: moment.Moment = moment(xScale.getValueForPixel(xScale.left + 1) as any);
+    let start = moment(xScale.getValueForPixel(xScale.left) as any);
+    let end = moment(xScale.getValueForPixel(xScale.left + 1) as any);
     const targetResolution = end.diff(start);
 
     return targetResolution * options.desiredDataPointDistance;

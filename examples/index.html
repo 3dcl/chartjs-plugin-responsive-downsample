@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Responsive Downsampling</title>
+    <script src="../node_modules/chart.js/dist/Chart.bundle.js"></script>
+    <script src="../node_modules/moment/min/moment-with-locales.min.js"></script>
+    <script src="../dist/chartjs-plugin-responsive-downsample.bundle.js"></script>
+</head>
+
+<body>
+    <div style="width: 100%">
+        <span id="displayed-points">Displayed Points: 200000</span>
+        <div>
+            <canvas id="chart"></canvas>
+        </div>
+    </div>
+    <script>
+        function generateData(fn, count) {
+            var output = [];
+            var startDate = new Date("2018-01-01T12:00:00.000Z");
+
+            for (var i = 0; i < count; ++i) {
+                output.push({
+                    x: new Date(startDate.getTime() + i * 1000).toISOString(),
+                    y: fn((i * 4 * Math.PI) / count)
+                });
+            }
+
+            return output;
+        }
+
+        function generateDataSet(name, color, fn, count) {
+            return {
+                label: name,
+                data: generateData(fn, count),
+                borderColor: color,
+                backgroundColor: color,
+                borderWidth: 2,
+                fill: false
+            };
+        }
+
+        var chartConfig = {
+            type: 'line',
+            data: {
+                datasets: [
+                    generateDataSet("sin", "#1ab394", Math.sin, 100000),
+                    generateDataSet("cos", "#d73a49", Math.cos, 100000)
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                title: {
+                    display: true,
+                    title: "Responsive Downsample Plugin"
+                },
+                responsiveDownsample: {
+                    enabled: true,
+                    desiredDataPointDistance: 10
+                },
+                scales: {
+                    xAxes: [
+                        {
+                            type: 'time',
+                            display: true,
+                            time: {
+                                displayFormats: {
+                                    second: "HH:mm:ss",
+                                    minute: "HH:mm:ss",
+                                    hour: "MMM D HH:mm"
+                                }
+                            },
+                            ticks: {
+                                fontSize: 10,
+                                maxTicksLimit: 8
+                            }
+                        }
+                    ]
+                },
+                animation: {
+                    duration: 0,
+                }
+            }
+        };
+
+        window.onload = function () {
+            var context = document.getElementById('chart').getContext("2d");
+            var chart = new Chart(context, chartConfig);
+
+            setInterval(function () {
+                var numPoints = chart.data.datasets.reduce(function (previous, current) {
+                    return previous + current.data.length;
+                }, 0);
+                document.getElementById('displayed-points').textContent = "Displayed Points: " + numPoints
+            }, 33);
+        };
+    </script>
+</body>
+
+</html>

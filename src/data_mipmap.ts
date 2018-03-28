@@ -25,7 +25,7 @@ export class DataMipmap {
    * @param data The orignal line chart data
    */
   setData(data: ChartPoint[]): void {
-    this.originalData = data;
+    this.originalData = data || [];
     this.mipMaps = [];
     this.resolution = this.computeResolution(this.originalData);
     this.createMipMap();

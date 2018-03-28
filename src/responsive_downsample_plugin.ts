@@ -66,8 +66,6 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
         ? dataset.originalData
         : dataset.data;
 
-      if (data.length === 0) { return; }
-
       const mipMap = (options.aggregationAlgorithm === 'LTTB')
         ? new LTTBDataMipmap(data, options.minNumPoints)
         : new DataMipmap(data, options.minNumPoints);

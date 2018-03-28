@@ -174,6 +174,40 @@ describe('ResponsiveDownsamplePlugin', function () {
             const mipmap: DataMipmap = mockChart.data.datasets[0]['mipMap'];
             expect(mipmap.getMipMaps()).to.have.length(7);
         });
+
+        it('should handle empty dataset', function () {
+            mockChart.data.datasets[0] = {
+                data: []
+            };
+            const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
+            ResponsiveDownsamplePlugin.createDataMipMap(mockChart, options);
+
+            expect(mockChart.data.datasets[0]).to.have.property('originalData').that.is.empty;
+            expect(mockChart.data.datasets[0])
+                .to.have.property('mipMap')
+                .that.is.instanceof(LTTBDataMipmap);
+
+            const mipmap: DataMipmap = mockChart.data.datasets[0]['mipMap'];
+            expect(mipmap.getMipMaps()).to.have.length(1);
+            expect(mipmap.getMipMaps()[0]).to.have.length(0);
+        });
+
+        it('should handle undefined dataset', function () {
+            mockChart.data.datasets[0] = {
+                data: undefined
+            };
+            const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
+            ResponsiveDownsamplePlugin.createDataMipMap(mockChart, options);
+
+            expect(mockChart.data.datasets[0]).to.have.property('originalData').that.is.undefined;
+            expect(mockChart.data.datasets[0])
+                .to.have.property('mipMap')
+                .that.is.instanceof(LTTBDataMipmap);
+
+            const mipmap: DataMipmap = mockChart.data.datasets[0]['mipMap'];
+            expect(mipmap.getMipMaps()).to.have.length(1);
+            expect(mipmap.getMipMaps()[0]).to.have.length(0);
+        });
     });
 
     describe('getTargetResolution', function () {
@@ -290,7 +324,7 @@ describe('ResponsiveDownsamplePlugin', function () {
 
         it('should update selected mipmap on initial draw', function () {
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
-            plugin.beforeDraw(mockChart);
+            expect(plugin.beforeDraw(mockChart)).to.be.false;
 
             return waitFor(101).then(() => {
                 expect(options.needsUpdate).to.be.false;
@@ -305,7 +339,7 @@ describe('ResponsiveDownsamplePlugin', function () {
 
         it('should update selected mipmap when time scale changes', function () {
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
-            plugin.beforeDraw(mockChart);
+            expect(plugin.beforeDraw(mockChart)).to.be.false;
 
             return waitFor(101).then(() => {
                 mockTimeScale.right = 10000;
@@ -320,6 +354,25 @@ describe('ResponsiveDownsamplePlugin', function () {
                 expect(mockChart.data.datasets[0])
                     .to.have.property('data')
                     .that.equals(mipmap.getMipMapLevel(0));
+            });
+        });
+
+        it('should not update selected mipmap if resolution does not change', function () {
+            const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
+            expect(plugin.beforeDraw(mockChart)).to.be.false;
+
+            return waitFor(101).then(() => {
+                expect(plugin.beforeDraw(mockChart)).to.be.undefined;
+
+                return waitFor(101);
+            }).then(() => {
+                expect(options.needsUpdate).to.be.false;
+                expect(options.targetResolution).to.equal(864000);
+
+                const mipmap: DataMipmap = mockChart.data.datasets[0]['mipMap'];
+                expect(mockChart.data.datasets[0])
+                    .to.have.property('data')
+                    .that.equals(mipmap.getMipMapLevel(1));
             });
         });
     });

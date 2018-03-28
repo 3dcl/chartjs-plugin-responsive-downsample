@@ -82,6 +82,14 @@ describe('DataMipMap', function () {
 
             expect(mipMapLevel).to.have.length(1);
         });
+
+        it('should handle null and undefined dataset', function () {
+            let mipMap = new DataMipmap(null);
+            expect(mipMap.getMipMaps()).to.have.length(1);
+
+            mipMap = new DataMipmap(undefined);
+            expect(mipMap.getMipMaps()).to.have.length(1);
+        });
     });
 
     describe('setData', function () {

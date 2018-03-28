@@ -120,7 +120,7 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     }
   }
 
-  beforeDraw(chart: Chart): void {
+  beforeDraw(chart: Chart): beoolean {
     const options = ResponsiveDownsamplePlugin.getPluginOptions(chart);
     if (!options.enabled) { return; }
 
@@ -129,6 +129,9 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
       options.targetResolution = targetResolution;
       ResponsiveDownsamplePlugin.updateMipMap(chart, targetResolution);
       options.needsUpdate = false;
+
+      // cancel draw to wait for update
+      return false;
     }
   }
 }

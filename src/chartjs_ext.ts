@@ -56,24 +56,24 @@ export interface IChartPlugin {
 
     resize?: (chartInstance: Chart, newChartSize: [number, number]) => void;
 
-    beforeUpdate?: (chartInstance: Chart) => void;
+    beforeUpdate?: (chartInstance: Chart) => void | boolean;
     afterScaleUpdate?: (charInstance: Chart) => void;
-    beforeDatasetsUpdate?: (charInstance: Chart) => void;
+    beforeDatasetsUpdate?: (charInstance: Chart) => void | boolean;
     afterDatasetsUpdate?: (charInstance: Chart) => void;
     afterUpdate?: (charInstance: Chart) => void;
 
-    beforeRender?: (charInstance: Chart) => void;
+    beforeRender?: (charInstance: Chart) => void | boolean;
 
-    beforeDraw?: (charInstance: Chart, easing: string) => void;
+    beforeDraw?: (charInstance: Chart, easing: string) => void | boolean;
     afterDraw?: (charInstance: Chart, easing: string) => void;
 
     // Before the datasets are drawn but after scales are drawn
-    beforeDatasetsDraw?: (charInstance: Chart, easing: string) => void;
+    beforeDatasetsDraw?: (charInstance: Chart, easing: string) => void | boolean;
     afterDatasetsDraw?: (charInstance: Chart, easing: string) => void;
 
     destroy?: (charInstance: Chart) => void;
 
     // Called when an event occurs on the chart
-    beforeEvent?: (charInstance: Chart, event: any) => void;
+    beforeEvent?: (charInstance: Chart, event: any) => void | boolean;
     afterEvent?: (charInstance: Chart, event: any) => void;
 }

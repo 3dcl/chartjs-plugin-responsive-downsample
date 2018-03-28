@@ -120,7 +120,7 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     }
   }
 
-  beforeDraw(chart: Chart): beoolean {
+  beforeDraw(chart: Chart): boolean {
     const options = ResponsiveDownsamplePlugin.getPluginOptions(chart);
     if (!options.enabled) { return; }
 

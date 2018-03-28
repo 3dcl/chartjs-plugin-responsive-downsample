@@ -94,7 +94,6 @@ export class DataMipmap {
   }
 
   protected createMipMap(): void {
-    const now = new Date();
     let targetResolution = this.resolution;
     let targetLength = this.originalData.length;
     this.mipMaps.push(this.originalData);
@@ -106,7 +105,6 @@ export class DataMipmap {
       lastMipMap = this.downsampleToResolution(lastMipMap, targetResolution, targetLength);
       this.mipMaps.push(lastMipMap);
     }
-    console.log("Creating mip maps took: %f ms", new Date().getTime() - now.getTime());
   }
 
   protected downsampleToResolution(

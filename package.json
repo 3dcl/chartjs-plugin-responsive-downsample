@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "description": "A chart.js plugin to dynamically downsample line chart data depending on the chart resolution.",
   "main": "./dist/index.js",
+  "browser": "./dist/chartjs-plugin-responsive-downsample.bundle.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "prepublish": "npm run build",
+    "prepublish": "npm run build && npm run build-browser && npm run build-browser-min",
     "build": "tsc",
+    "build-browser": "browserify src/index.ts -o dist/chartjs-plugin-responsive-downsample.bundle.js -p [ tsify ] --ignore chart.js --ignore moment",
+    "build-browser-min": "browserify src/index.ts -o dist/chartjs-plugin-responsive-downsample.bundle.min.js -p [ tsify ] --ignore chart.js --ignore moment",
     "test": "mocha test/unit/**.ts"
   },
   "repository": {

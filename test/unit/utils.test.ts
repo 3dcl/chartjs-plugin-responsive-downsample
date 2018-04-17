@@ -27,6 +27,33 @@ describe('utils', function () {
         });
     });
 
+    describe('findInArray', function () {
+        it('should return the first matched element in an array', function () {
+            var a = [1,2,3,4,5,6];
+            expect(util.findInArray(a, (number) => {return number === 3})).to.equal(3);
+            expect(util.findInArray(a, (number) => {return (number % 3) === 0})).to.equal(3);
+        });
+        it('should return undefined if the element is not in the array', function () {
+            var a = [1,2,3,4,5,6];
+            expect(util.findInArray(a, (number) => {return number === 2345})).to.equal(undefined);            
+        });
+
+    });
+
+    describe('findIndexInArray', function () {
+        it('should return the first matched index in an array', function () {
+            var a = [1,2,3,4,5,6];
+            expect(util.findIndexInArray(a, (number) => {return number === 3})).to.equal(2);
+            expect(util.findIndexInArray(a, (number) => {return (number % 3) === 0})).to.equal(2);
+        });
+
+        it('should return undefined if the element is not in the array', function () {
+            var a = [1,2,3,4,5,6];
+            expect(util.findIndexInArray(a, (number) => {return number === 2345})).to.equal(-1);            
+        });
+
+    });
+
     describe('defaultsDeep', function () {
         it('should replace values of object without nesting', function () {
             let options: any = {

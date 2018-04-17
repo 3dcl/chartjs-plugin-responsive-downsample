@@ -11,7 +11,7 @@ export class LTTBDataMipmap extends DataMipmap {
     getMipMapForResolution(resolution: number): ChartPoint[] {
         if (utils.isNil(resolution)) { return this.getMipMapLevel(0); }
 
-        let index = this.resolutions.findIndex((levelResolution) => levelResolution >= resolution);
+        let index = utils.findIndexInArray(this.resolutions, (levelResolution) => levelResolution >= resolution);
         if (index === -1) {
             // use smallest mipmap as fallback
             index = this.resolutions.length - 1;

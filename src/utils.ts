@@ -55,3 +55,23 @@ export function findInArray<T>(array: Array<T>, compareFunction: (element: T) =>
     }
     return undefined;
 }
+
+
+/**
+ * Finds the first index in an array for that the comaperator function for an element returns true
+ * 
+ * @export
+ * @template T 
+ * @param {Array<T>} array An array of elements
+ * @param {(element: T) => boolean} compareFunction Comperator function returning true for the element seeked 
+ * @returns {number} Index of the matched element or -1 if no element was found
+ */
+export function findIndexInArray<T>(array: Array<T>, compareFunction: (element: T) => boolean) : number{
+    if(isNil(array)) return undefined;
+    for (var i = 0; i < array.length; i++){
+        if(compareFunction(array[i]) === true) {
+            return i;
+        }
+    }
+    return -1;
+}

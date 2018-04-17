@@ -8,7 +8,7 @@
     "module": "commonjs",
     "lib": [
       "dom",
-      "es6"
+      "es5"
     ]
   },
   "include": [

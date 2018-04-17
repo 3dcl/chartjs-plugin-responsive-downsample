@@ -55,9 +55,14 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
   }
 
   static hasDataChanged(chart: Chart): boolean {
-    const changedDataSet = chart.data.datasets.find((dataset: any) => utils.isNil(dataset.mipMap));
-
-    return !utils.isNil(changedDataSet);
+    return !utils.isNil(
+      utils.findInArray(
+        chart.data.datasets as Array<any>, 
+        (dataset)=>{
+          return utils.isNil(dataset.mipMap)
+        }
+      )
+    );    
   }
 
   static createDataMipMap(chart: Chart, options: ResponsiveDownsamplePluginOptions): void {

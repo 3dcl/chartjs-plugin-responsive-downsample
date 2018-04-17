@@ -35,3 +35,23 @@ export function defaultsDeep<T>(object: T, defaults: Partial<T>): T {
 
     return object;
 }
+
+
+/**
+ * Finds the first element in an array for that the comaperator functions returns true
+ * 
+ * @export
+ * @template T Element type of the array
+ * @param {Array<T>} array An array
+ * @param {(element: T) => boolean} compareFunction Comperator function returning true for the element seeked
+ * @returns {T} The found element or undefined
+ */
+export function findInArray<T>(array: Array<T>, compareFunction: (element: T) => boolean) : T{
+    if(isNil(array)) return undefined;
+    for (var i = 0; i < array.length; i++){
+        if(compareFunction(array[i]) === true) {
+            return array[i];            
+        }
+    }
+    return undefined;
+}

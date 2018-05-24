@@ -58,6 +58,7 @@ export interface IChartPlugin {
 
     beforeUpdate?: (chartInstance: Chart) => void | boolean;
     afterScaleUpdate?: (charInstance: Chart) => void;
+    afterLayout?: (charInstance: Chart) => void;
     beforeDatasetsUpdate?: (charInstance: Chart) => void | boolean;
     afterDatasetsUpdate?: (charInstance: Chart) => void;
     afterUpdate?: (charInstance: Chart) => void;

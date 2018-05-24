@@ -116,11 +116,11 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     for (let i = 1; i < data.length; ++i) {
       const point = data[i];
 
-      if (point.x <= start) {
+      if (new Date(point.x as string) <= start.toDate()) {
         startIndex = i;
       }
 
-      if (point.x >= end) {
+      if (new Date(point.x as string) >= end.toDate()) {
         endIndex = i + 1;
         break;
       }

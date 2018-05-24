@@ -76,7 +76,8 @@ describe('ResponsiveDownsamplePlugin', function () {
                 enabled: true,
                 aggregationAlgorithm: 'LTTB',
                 desiredDataPointDistance: 1,
-                minNumPoints: 100
+                minNumPoints: 100,
+                filterXRange: true
             });
         });
 
@@ -87,7 +88,8 @@ describe('ResponsiveDownsamplePlugin', function () {
                         enabled: true,
                         aggregationAlgorithm: 'AVG',
                         desiredDataPointDistance: 5,
-                        minNumPoints: 2
+                        minNumPoints: 2,
+                        filterXRange: false
                     }
                 }
             });
@@ -96,7 +98,8 @@ describe('ResponsiveDownsamplePlugin', function () {
                 enabled: true,
                 aggregationAlgorithm: 'AVG',
                 desiredDataPointDistance: 5,
-                minNumPoints: 2
+                minNumPoints: 2,
+                filterXRange: false
             });
         });
     });
@@ -239,13 +242,13 @@ describe('ResponsiveDownsamplePlugin', function () {
         it('should update mip map level', function () {
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
             ResponsiveDownsamplePlugin.createDataMipMap(mockChart, options);
-            ResponsiveDownsamplePlugin.updateMipMap(mockChart, 864000);
+            ResponsiveDownsamplePlugin.updateMipMap(mockChart, 864000, options);
 
             return waitFor(101).then(() => {
                 expect(mockChart.data.datasets[0].data).to.not.equal(mockChart.data.datasets[0]['originalData']);
 
                 const mipmap: DataMipmap = mockChart.data.datasets[0]['mipMap'];
-                expect(mockChart.data.datasets[0].data).to.equal(mipmap.getMipMapLevel(1));
+                expect(mockChart.data.datasets[0].data).to.deep.equal(mipmap.getMipMapLevel(1));
             });
         });
     });
@@ -333,7 +336,7 @@ describe('ResponsiveDownsamplePlugin', function () {
                 const mipmap: DataMipmap = mockChart.data.datasets[0]['mipMap'];
                 expect(mockChart.data.datasets[0])
                     .to.have.property('data')
-                    .that.equals(mipmap.getMipMapLevel(1));
+                    .that.deep.equals(mipmap.getMipMapLevel(1));
             });
         });
 
@@ -353,7 +356,7 @@ describe('ResponsiveDownsamplePlugin', function () {
                 const mipmap: DataMipmap = mockChart.data.datasets[0]['mipMap'];
                 expect(mockChart.data.datasets[0])
                     .to.have.property('data')
-                    .that.equals(mipmap.getMipMapLevel(0));
+                    .that.deep.equals(mipmap.getMipMapLevel(0));
             });
         });
 
@@ -372,7 +375,7 @@ describe('ResponsiveDownsamplePlugin', function () {
                 const mipmap: DataMipmap = mockChart.data.datasets[0]['mipMap'];
                 expect(mockChart.data.datasets[0])
                     .to.have.property('data')
-                    .that.equals(mipmap.getMipMapLevel(1));
+                    .that.deep.equals(mipmap.getMipMapLevel(1));
             });
         });
     });

@@ -8,8 +8,8 @@ import { DataMipmap } from './data_mipmap';
 export class LTTBDataMipmap extends DataMipmap {
     protected resolutions: number[];
 
-    getMipMapForResolution(resolution: number): ChartPoint[] {
-        if (utils.isNil(resolution)) { return this.getMipMapLevel(0); }
+    getMipMapIndexForResolution(resolution: number): number {
+        if (utils.isNil(resolution)) { return 0; }
 
         let index = utils.findIndexInArray(this.resolutions, (levelResolution) => levelResolution >= resolution);
         if (index === -1) {
@@ -17,7 +17,7 @@ export class LTTBDataMipmap extends DataMipmap {
             index = this.resolutions.length - 1;
         }
 
-        return this.getMipMapLevel(index);
+        return index;
     }
 
     protected createMipMap(): void {

@@ -1,11 +1,17 @@
 import moment_module = require('moment');
 const moment = (window && (window as any).moment) ? (window as any).moment : moment_module;
-import { Chart, ChartData, ChartPoint } from 'chart.js';
+import { Chart, ChartData, ChartDataSets, ChartPoint } from 'chart.js';
 import { IChartPlugin, TimeScale } from './chartjs_ext';
 import * as utils from './utils';
 
 import { DataMipmap } from './data_mipmap';
 import { LTTBDataMipmap } from './lttb_data_mipmap';
+
+interface MipMapDataSets extends ChartDataSets {
+  originalData?: ChartPoint[];
+  currentMipMapLevel?: number;
+  mipMap?: DataMipmap;
+}
 
 export interface ResponsiveDownsamplePluginOptions {
   /**
@@ -25,6 +31,11 @@ export interface ResponsiveDownsamplePluginOptions {
    */
   minNumPoints?: number;
   /**
+   * Filters data to actual range of x axis
+   */
+  filterXRange?: boolean;
+
+  /**
    * Flag is set by plugin to trigger reload of data
    */
   needsUpdate?: boolean;
@@ -33,9 +44,13 @@ export interface ResponsiveDownsamplePluginOptions {
    */
   targetResolution?: number;
   /**
-   * Filters data to actual range of x axis
+   * Start of x axis
    */
-  filterXRange?: boolean;
+  start?: Date;
+  /**
+   * End of x axis;
+   */
+  end?: Date;
 }
 
 /**
@@ -62,7 +77,7 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
   static hasDataChanged(chart: Chart): boolean {
     return !utils.isNil(
       utils.findInArray(
-        chart.data.datasets as Array<any>,
+        chart.data.datasets as MipMapDataSets[],
         (dataset) => {
           return utils.isNil(dataset.mipMap)
         }
@@ -71,10 +86,10 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
   }
 
   static createDataMipMap(chart: Chart, options: ResponsiveDownsamplePluginOptions): void {
-    chart.data.datasets.forEach((dataset: any, i) => {
+    chart.data.datasets.forEach((dataset: MipMapDataSets, i) => {
       const data = !utils.isNil(dataset.originalData)
         ? dataset.originalData
-        : dataset.data;
+        : dataset.data as ChartPoint[];
 
       const mipMap = (options.aggregationAlgorithm === 'LTTB')
         ? new LTTBDataMipmap(data, options.minNumPoints)
@@ -98,7 +113,7 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     return targetResolution * options.desiredDataPointDistance;
   }
 
-  static getStartAndEnd(chart: Chart): [any, any] {
+  static getStartAndEnd(chart: Chart): [Date, Date] {
     const xScale: TimeScale = (chart as any).scales["x-axis-0"];
 
     if (utils.isNil(xScale)) return [null, null];
@@ -106,21 +121,21 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     let start = moment(xScale.getValueForPixel(xScale.left) as any);
     let end = moment(xScale.getValueForPixel(xScale.right) as any);
 
-    return [start, end];
+    return [start.toDate(), end.toDate()];
   }
 
-  static filterData(data: ChartPoint[], start: any, end: any): ChartPoint[] {
+  static filterData(data: ChartPoint[], start: Date, end: Date): ChartPoint[] {
     let startIndex = 0;
     let endIndex = data.length;
 
     for (let i = 1; i < data.length; ++i) {
       const point = data[i];
 
-      if (new Date(point.x as string) <= start.toDate()) {
+      if (new Date(point.x as string) <= start) {
         startIndex = i;
       }
 
-      if (new Date(point.x as string) >= end.toDate()) {
+      if (new Date(point.x as string) >= end) {
         endIndex = i + 1;
         break;
       }
@@ -129,20 +144,30 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     return data.slice(startIndex, endIndex);
   }
 
-  static updateMipMap(chart: Chart, targetResolution: number, options: ResponsiveDownsamplePluginOptions): void {
-    const [start, end] = ResponsiveDownsamplePlugin.getStartAndEnd(chart);
-    chart.data.datasets.forEach((dataset: any, i) => {
-      const mipMap = dataset.mipMap
+  static updateMipMap(chart: Chart, options: ResponsiveDownsamplePluginOptions, timeChanged: boolean): boolean {
+    let updated = false;
+
+    chart.data.datasets.forEach((dataset: MipMapDataSets, i) => {
+      const mipMap = dataset.mipMap;
       if (utils.isNil(mipMap)) return;
 
-      let newData = mipMap.getMipMapForResolution(targetResolution);
-      if (options.filterXRange) {
-        newData = ResponsiveDownsamplePlugin.filterData(newData, start, end)
+      // check if mip map level actually changed
+      let mipMalLevel = mipMap.getMipMapIndexForResolution(options.targetResolution);
+      if (mipMalLevel === dataset.currentMipMapLevel && !timeChanged) {
+        return;
       }
+      updated = true;
+      dataset.currentMipMapLevel = mipMalLevel;
+
+      let newData = mipMap.getMipMapLevel(mipMalLevel);
+      if (options.filterXRange) {
+        newData = ResponsiveDownsamplePlugin.filterData(newData, options.start, options.end)
+      }
+
       dataset.data = newData;
     });
-    // defer update because chart is still in render loop
-    setTimeout(() => chart.update(), 100);
+
+    return updated;
   }
 
   beforeInit(chart: Chart): void {
@@ -164,18 +189,34 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     }
   }
 
-  beforeDraw(chart: Chart): boolean {
+  beforeRender(chart: Chart): boolean {
     const options = ResponsiveDownsamplePlugin.getPluginOptions(chart);
     if (!options.enabled) { return; }
 
     const targetResolution = ResponsiveDownsamplePlugin.getTargetResolution(chart, options);
-    if (options.needsUpdate || options.targetResolution !== targetResolution) {
+    const [start, end] = ResponsiveDownsamplePlugin.getStartAndEnd(chart);
+    const timeChanged = (
+      utils.isNil(options.start) ||
+      utils.isNil(options.end) ||
+      start.getTime() !== options.start.getTime() ||
+      end.getTime() !== options.end.getTime()
+    );
+
+    if (options.needsUpdate ||
+      options.targetResolution !== targetResolution ||
+      timeChanged
+    ) {
       options.targetResolution = targetResolution;
-      ResponsiveDownsamplePlugin.updateMipMap(chart, targetResolution, options);
+      options.start = start;
+      options.end = end;
       options.needsUpdate = false;
 
-      // cancel draw to wait for update
-      return false;
+      if (ResponsiveDownsamplePlugin.updateMipMap(chart, options, timeChanged)) {
+        // update chart and cancel current render
+        chart.update(0);
+
+        return false;
+      }
     }
   }
 }

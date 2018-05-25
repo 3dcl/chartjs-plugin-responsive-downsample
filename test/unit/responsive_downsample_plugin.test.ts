@@ -242,7 +242,8 @@ describe('ResponsiveDownsamplePlugin', function () {
         it('should update mip map level', function () {
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
             ResponsiveDownsamplePlugin.createDataMipMap(mockChart, options);
-            ResponsiveDownsamplePlugin.updateMipMap(mockChart, 864000, options);
+            options.targetResolution = 864000;
+            ResponsiveDownsamplePlugin.updateMipMap(mockChart, options, false);
 
             return waitFor(101).then(() => {
                 expect(mockChart.data.datasets[0].data).to.not.equal(mockChart.data.datasets[0]['originalData']);
@@ -317,7 +318,7 @@ describe('ResponsiveDownsamplePlugin', function () {
         });
     });
 
-    describe('beforeDraw', function () {
+    describe('beforeRender', function () {
         let plugin: ResponsiveDownsamplePlugin;
         beforeEach(function () {
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
@@ -327,7 +328,7 @@ describe('ResponsiveDownsamplePlugin', function () {
 
         it('should update selected mipmap on initial draw', function () {
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
-            expect(plugin.beforeDraw(mockChart)).to.be.false;
+            expect(plugin.beforeRender(mockChart)).to.be.false;
 
             return waitFor(101).then(() => {
                 expect(options.needsUpdate).to.be.false;
@@ -342,11 +343,11 @@ describe('ResponsiveDownsamplePlugin', function () {
 
         it('should update selected mipmap when time scale changes', function () {
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
-            expect(plugin.beforeDraw(mockChart)).to.be.false;
+            expect(plugin.beforeRender(mockChart)).to.be.false;
 
             return waitFor(101).then(() => {
                 mockTimeScale.right = 10000;
-                plugin.beforeDraw(mockChart);
+                plugin.beforeRender(mockChart);
 
                 return waitFor(101);
             }).then(() => {
@@ -362,10 +363,10 @@ describe('ResponsiveDownsamplePlugin', function () {
 
         it('should not update selected mipmap if resolution does not change', function () {
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
-            expect(plugin.beforeDraw(mockChart)).to.be.false;
+            expect(plugin.beforeRender(mockChart)).to.be.false;
 
             return waitFor(101).then(() => {
-                expect(plugin.beforeDraw(mockChart)).to.be.undefined;
+                expect(plugin.beforeRender(mockChart)).to.be.undefined;
 
                 return waitFor(101);
             }).then(() => {

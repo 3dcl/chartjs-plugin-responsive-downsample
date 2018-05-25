@@ -25,7 +25,11 @@ Inspired by: [AlbinoDrought/chartjs-plugin-downsample](https://github.com/Albino
              * The minimal number of data points. The chart data is not downsampled further than
              * this threshold. Default: 100
              */
-            minNumPoints?: 100
+            minNumPoints: 100,
+             /**
+              * Cull data to displayed range of x scale. Default: true
+              */
+            cullData: boolean;
         }
     }
 }

@@ -77,7 +77,7 @@ describe('ResponsiveDownsamplePlugin', function () {
                 aggregationAlgorithm: 'LTTB',
                 desiredDataPointDistance: 1,
                 minNumPoints: 100,
-                filterXRange: true
+                cullData: true
             });
         });
 
@@ -89,7 +89,7 @@ describe('ResponsiveDownsamplePlugin', function () {
                         aggregationAlgorithm: 'AVG',
                         desiredDataPointDistance: 5,
                         minNumPoints: 2,
-                        filterXRange: false
+                        cullData: false
                     }
                 }
             });
@@ -99,7 +99,7 @@ describe('ResponsiveDownsamplePlugin', function () {
                 aggregationAlgorithm: 'AVG',
                 desiredDataPointDistance: 5,
                 minNumPoints: 2,
-                filterXRange: false
+                cullData: false
             });
         });
     });
@@ -243,6 +243,7 @@ describe('ResponsiveDownsamplePlugin', function () {
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
             ResponsiveDownsamplePlugin.createDataMipMap(mockChart, options);
             options.targetResolution = 864000;
+            options.scaleRange = [testData[0].x, testData[testData.length - 1].x];
             ResponsiveDownsamplePlugin.updateMipMap(mockChart, options, false);
 
             return waitFor(101).then(() => {

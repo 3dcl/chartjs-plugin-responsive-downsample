@@ -1,11 +1,18 @@
 import moment_module = require('moment');
 const moment = (window && (window as any).moment) ? (window as any).moment : moment_module;
-import { Chart } from 'chart.js';
+import { Chart, ChartData, ChartDataSets, ChartPoint } from 'chart.js';
 import { IChartPlugin, TimeScale } from './chartjs_ext';
 import * as utils from './utils';
 
 import { DataMipmap } from './data_mipmap';
 import { LTTBDataMipmap } from './lttb_data_mipmap';
+import * as data_culling from './data_culling';
+
+interface MipMapDataSets extends ChartDataSets {
+  originalData?: ChartPoint[];
+  currentMipMapLevel?: number;
+  mipMap?: DataMipmap;
+}
 
 export interface ResponsiveDownsamplePluginOptions {
   /**
@@ -25,6 +32,10 @@ export interface ResponsiveDownsamplePluginOptions {
    */
   minNumPoints?: number;
   /**
+   * Cull data to displayed range of x scale
+   */
+  cullData?: boolean;
+  /**
    * Flag is set by plugin to trigger reload of data
    */
   needsUpdate?: boolean;
@@ -32,6 +43,10 @@ export interface ResponsiveDownsamplePluginOptions {
    * Current target resolution(Set by plugin)
    */
   targetResolution?: number;
+  /**
+   * Scale range of x axis
+   */
+  scaleRange?: data_culling.Range;
 }
 
 /**
@@ -44,7 +59,8 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
       enabled: false,
       aggregationAlgorithm: 'LTTB',
       desiredDataPointDistance: 1,
-      minNumPoints: 100
+      minNumPoints: 100,
+      cullData: true
     });
 
     if (options.enabled) {
@@ -57,19 +73,19 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
   static hasDataChanged(chart: Chart): boolean {
     return !utils.isNil(
       utils.findInArray(
-        chart.data.datasets as Array<any>, 
-        (dataset)=>{
+        chart.data.datasets as MipMapDataSets[],
+        (dataset) => {
           return utils.isNil(dataset.mipMap)
         }
       )
-    );    
+    );
   }
 
   static createDataMipMap(chart: Chart, options: ResponsiveDownsamplePluginOptions): void {
-    chart.data.datasets.forEach((dataset: any, i) => {
+    chart.data.datasets.forEach((dataset: MipMapDataSets, i) => {
       const data = !utils.isNil(dataset.originalData)
         ? dataset.originalData
-        : dataset.data;
+        : dataset.data as ChartPoint[];
 
       const mipMap = (options.aggregationAlgorithm === 'LTTB')
         ? new LTTBDataMipmap(data, options.minNumPoints)
@@ -93,15 +109,30 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     return targetResolution * options.desiredDataPointDistance;
   }
 
-  static updateMipMap(chart: Chart, targetResolution: number): void {
-    chart.data.datasets.forEach((dataset: any, i) => {
-      const mipMap = dataset.mipMap
+  static updateMipMap(chart: Chart, options: ResponsiveDownsamplePluginOptions, rangeChanged: boolean): boolean {
+    let updated = false;
+
+    chart.data.datasets.forEach((dataset: MipMapDataSets, i) => {
+      const mipMap = dataset.mipMap;
       if (utils.isNil(mipMap)) return;
 
-      dataset.data = mipMap.getMipMapForResolution(targetResolution);
+      let mipMalLevel = mipMap.getMipMapIndexForResolution(options.targetResolution);
+      if (mipMalLevel === dataset.currentMipMapLevel && !rangeChanged) {
+        // skip update if mip map level and data range did not change
+        return;
+      }
+      updated = true;
+      dataset.currentMipMapLevel = mipMalLevel;
+
+      let newData = mipMap.getMipMapLevel(mipMalLevel);
+      if (options.cullData) {
+        newData = data_culling.cullData(newData, options.scaleRange)
+      }
+
+      dataset.data = newData;
     });
-    // defer update because chart is still in render loop
-    setTimeout(() => chart.update(), 100);
+
+    return updated;
   }
 
   beforeInit(chart: Chart): void {
@@ -123,18 +154,29 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     }
   }
 
-  beforeDraw(chart: Chart): boolean {
+  beforeRender(chart: Chart): boolean {
     const options = ResponsiveDownsamplePlugin.getPluginOptions(chart);
     if (!options.enabled) { return; }
 
     const targetResolution = ResponsiveDownsamplePlugin.getTargetResolution(chart, options);
-    if (options.needsUpdate || options.targetResolution !== targetResolution) {
+    const xScale: TimeScale = (chart as any).scales["x-axis-0"];
+    const scaleRange = data_culling.getScaleRange(xScale);
+    const rangeChanged = !data_culling.rangeIsEqual(options.scaleRange, scaleRange);
+
+    if (options.needsUpdate ||
+      options.targetResolution !== targetResolution ||
+      rangeChanged
+    ) {
       options.targetResolution = targetResolution;
-      ResponsiveDownsamplePlugin.updateMipMap(chart, targetResolution);
+      options.scaleRange = scaleRange;
       options.needsUpdate = false;
 
-      // cancel draw to wait for update
-      return false;
+      if (ResponsiveDownsamplePlugin.updateMipMap(chart, options, rangeChanged)) {
+        // update chart and cancel current render
+        chart.update(0);
+
+        return false;
+      }
     }
   }
 }

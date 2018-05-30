@@ -46,12 +46,20 @@ export class DataMipmap {
    * @param resolution Desired resolution in ms per pixel
    */
   getMipMapForResolution(resolution: number): ChartPoint[] {
-    if (utils.isNil(resolution)) { return this.getMipMapLevel(0); }
+    return this.getMipMapLevel(this.getMipMapIndexForResolution(resolution));
+  }
+
+  /**
+   * Computes the index of the best fitting mipmap level for a certain scale resolution
+   * @param resolution Desired resolution in ms per pixel
+   */
+  getMipMapIndexForResolution(resolution: number): number {
+    if (utils.isNil(resolution)) { return 0; }
 
     const factor = resolution / this.resolution;
     let level = utils.clamp(Math.floor(Math.log(factor) / Math.log(2.0)), 0, this.mipMaps.length - 1);
 
-    return this.getMipMapLevel(level);
+    return level;
   }
 
   /**

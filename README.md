@@ -1,4 +1,7 @@
-# chartjs-plugin-responsive-downsample
+chartjs-plugin-responsive-downsample
+====================================
+[![Build Status](https://travis-ci.com/3dcl/chartjs-plugin-responsive-downsample.svg?branch=master)](https://travis-ci.com/3dcl/chartjs-plugin-responsive-downsample)
+
 A chart.js plugin to dynamically downsample line chart data depending on the chart resolution.
 The plugin creates a mipmap-like data structure from line chart data and dynamically choses a downsampled version of the data depending on the chart resolution and x axis scale.
 
@@ -25,7 +28,11 @@ Inspired by: [AlbinoDrought/chartjs-plugin-downsample](https://github.com/Albino
              * The minimal number of data points. The chart data is not downsampled further than
              * this threshold. Default: 100
              */
-            minNumPoints?: 100
+            minNumPoints: 100,
+             /**
+              * Cull data to displayed range of x scale. Default: true
+              */
+            cullData: boolean;
         }
     }
 }

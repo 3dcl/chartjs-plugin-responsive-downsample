@@ -97,6 +97,19 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     });
   }
 
+  static restoreOriginalData(chart: Chart): boolean {
+    let updated = false;
+
+    chart.data.datasets.forEach((dataset: MipMapDataSets) => {
+      if (!utils.isNil(dataset.originalData)) {
+        dataset.data = dataset.originalData;
+        updated = true;
+      }
+    });
+
+    return updated;
+  }
+
   static getTargetResolution(chart: Chart, options: ResponsiveDownsamplePluginOptions): number {
     const xScale: TimeScale = (chart as any).scales["x-axis-0"];
 
@@ -145,7 +158,11 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
 
   beforeDatasetsUpdate(chart: Chart): void {
     const options = ResponsiveDownsamplePlugin.getPluginOptions(chart);
-    if (!options.enabled) { return; }
+    if (!options.enabled) {
+      // restore original data if present
+      options.needsUpdate = ResponsiveDownsamplePlugin.restoreOriginalData(chart);
+      return;
+    }
 
     // only update mip map if data set was reloaded externally
     if (ResponsiveDownsamplePlugin.hasDataChanged(chart)) {
@@ -156,7 +173,16 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
 
   beforeRender(chart: Chart): boolean {
     const options = ResponsiveDownsamplePlugin.getPluginOptions(chart);
-    if (!options.enabled) { return; }
+    if (!options.enabled) {
+      // update chart if data was restored from original data
+      if (options.needsUpdate) {
+        options.needsUpdate = false;
+        chart.update(0);
+
+        return false;
+      }
+      return;
+    }
 
     const targetResolution = ResponsiveDownsamplePlugin.getTargetResolution(chart, options);
     const xScale: TimeScale = (chart as any).scales["x-axis-0"];

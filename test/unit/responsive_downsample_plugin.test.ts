@@ -286,12 +286,15 @@ describe('ResponsiveDownsamplePlugin', function () {
             options.needsUpdate = false;
         });
 
-        it('should do nothing when disabled', function () {
+        it('should restore original data if plugin is disabled', function () {
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
             options.enabled = false;
 
             plugin.beforeDatasetsUpdate(mockChart);
-            expect(options.needsUpdate).to.be.false;
+            expect(options.needsUpdate).to.be.true;
+            expect(mockChart.data.datasets[0])
+                .to.have.property('originalData')
+                .that.is.equal(mockChart.data.datasets[0].data);
         });
 
         it('should do nothing when data has not changed', function () {
@@ -378,6 +381,22 @@ describe('ResponsiveDownsamplePlugin', function () {
                 expect(mockChart.data.datasets[0])
                     .to.have.property('data')
                     .that.deep.equals(mipmap.getMipMapLevel(1));
+            });
+        });
+
+        it('should skip rendering and update chart if orignal data was restored', function () {
+            const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
+            plugin.beforeDatasetsUpdate(mockChart);
+            options.enabled = false;
+            options.needsUpdate = true;
+            plugin.beforeDatasetsUpdate(mockChart);
+            expect(plugin.beforeRender(mockChart)).to.be.false;
+
+            return waitFor(101).then(() => {
+                expect(options.needsUpdate).to.be.false;
+                expect(mockChart.data.datasets[0])
+                    .to.have.property('originalData')
+                    .that.is.equal(mockChart.data.datasets[0].data);
             });
         });
     });

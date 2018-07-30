@@ -55,7 +55,7 @@ export interface ResponsiveDownsamplePluginOptions {
 export class ResponsiveDownsamplePlugin implements IChartPlugin {
   static getPluginOptions(chart: any): ResponsiveDownsamplePluginOptions {
     let options: ResponsiveDownsamplePluginOptions = chart.options.responsiveDownsample || {};
-    utils.defaultsDeep(options || {}, {
+    utils.defaultsDeep(options, {
       enabled: false,
       aggregationAlgorithm: 'LTTB',
       desiredDataPointDistance: 1,
@@ -101,7 +101,10 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
     let updated = false;
 
     chart.data.datasets.forEach((dataset: MipMapDataSets) => {
-      if (!utils.isNil(dataset.originalData)) {
+      if (
+        !utils.isNil(dataset.originalData) &&
+        dataset.data !== dataset.originalData
+      ) {
         dataset.data = dataset.originalData;
         updated = true;
       }
@@ -159,8 +162,10 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
   beforeDatasetsUpdate(chart: Chart): void {
     const options = ResponsiveDownsamplePlugin.getPluginOptions(chart);
     if (!options.enabled) {
-      // restore original data if present
+      // restore original data and remove state from options
       options.needsUpdate = ResponsiveDownsamplePlugin.restoreOriginalData(chart);
+      delete options.targetResolution;
+      delete options.scaleRange;
       return;
     }
 

@@ -253,6 +253,53 @@ describe('ResponsiveDownsamplePlugin', function () {
                 expect(mockChart.data.datasets[0].data).to.deep.equal(mipmap.getMipMapLevel(1));
             });
         });
+
+        it('should allow to disable data culling', function () {
+            const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
+            ResponsiveDownsamplePlugin.createDataMipMap(mockChart, options);
+            options.cullData = false;
+            options.targetResolution = 864000;
+            options.scaleRange = [testData[0].x, testData[testData.length - 1].x];
+            ResponsiveDownsamplePlugin.updateMipMap(mockChart, options, false);
+
+            return waitFor(101).then(() => {
+                expect(mockChart.data.datasets[0].data).to.not.equal(mockChart.data.datasets[0]['originalData']);
+
+                const mipmap: DataMipmap = mockChart.data.datasets[0]['mipMap'];
+                expect(mockChart.data.datasets[0].data).to.deep.equal(mipmap.getMipMapLevel(1));
+            });
+        });
+
+        it('should skip update if mip map level and data range did no change', function () {
+            const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
+            ResponsiveDownsamplePlugin.createDataMipMap(mockChart, options);
+            options.cullData = false;
+            options.targetResolution = 864000;
+            options.scaleRange = [testData[0].x, testData[testData.length - 1].x];
+            mockChart.data.datasets[0]['currentMipMapLevel'] = 1;
+            ResponsiveDownsamplePlugin.updateMipMap(mockChart, options, false);
+
+            return waitFor(101).then(() => {
+                expect(mockChart.data.datasets[0].data).to.not.equal(mockChart.data.datasets[0]['originalData']);
+
+                const mipmap: DataMipmap = mockChart.data.datasets[0]['mipMap'];
+                expect(mockChart.data.datasets[0].data).to.deep.equal(mipmap.getMipMapLevel(1));
+            });
+        });
+
+        it('should skip update if mip map data structure is missing', function () {
+            const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
+            ResponsiveDownsamplePlugin.createDataMipMap(mockChart, options);
+            options.cullData = false;
+            options.targetResolution = 864000;
+            options.scaleRange = [testData[0].x, testData[testData.length - 1].x];
+            delete mockChart.data.datasets[0]['mipMap'];
+            ResponsiveDownsamplePlugin.updateMipMap(mockChart, options, false);
+
+            return waitFor(101).then(() => {
+                expect(mockChart.data.datasets[0].data).to.not.equal(mockChart.data.datasets[0]['originalData']);
+            });
+        });
     });
 
     describe('beforeInit', function () {
@@ -287,6 +334,8 @@ describe('ResponsiveDownsamplePlugin', function () {
         });
 
         it('should restore original data if plugin is disabled', function () {
+            plugin.beforeDatasetsUpdate(mockChart);
+            expect(mockChart.data.datasets[0]).to.have.property('originalData');
             const options = ResponsiveDownsamplePlugin.getPluginOptions(mockChart);
             options.enabled = false;
 
@@ -295,6 +344,15 @@ describe('ResponsiveDownsamplePlugin', function () {
             expect(mockChart.data.datasets[0])
                 .to.have.property('originalData')
                 .that.is.equal(mockChart.data.datasets[0].data);
+
+            // only restore data once to prevent an infinite update loop
+            options.needsUpdate = false;
+            options.targetResolution = 5.0;
+            options.scaleRange = [0, 1];
+            plugin.beforeDatasetsUpdate(mockChart);
+            expect(options.needsUpdate).to.be.false;
+            expect(options).to.not.have.property('targetResolution');
+            expect(options).to.not.have.property('scaleRange');
         });
 
         it('should do nothing when data has not changed', function () {
@@ -397,6 +455,8 @@ describe('ResponsiveDownsamplePlugin', function () {
                 expect(mockChart.data.datasets[0])
                     .to.have.property('originalData')
                     .that.is.equal(mockChart.data.datasets[0].data);
+
+                expect(plugin.beforeRender(mockChart)).to.be.undefined;
             });
         });
     });

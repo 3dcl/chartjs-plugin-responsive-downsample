@@ -55,7 +55,7 @@ export interface ResponsiveDownsamplePluginOptions {
 export class ResponsiveDownsamplePlugin implements IChartPlugin {
   static getPluginOptions(chart: any): ResponsiveDownsamplePluginOptions {
     let options: ResponsiveDownsamplePluginOptions = chart.options.responsiveDownsample || {};
-    utils.defaultsDeep(options || {}, {
+    utils.defaultsDeep(options, {
       enabled: false,
       aggregationAlgorithm: 'LTTB',
       desiredDataPointDistance: 1,
@@ -95,6 +95,22 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
       dataset.mipMap = mipMap;
       dataset.data = mipMap.getMipMapLevel(mipMap.getNumLevel() - 1); // set last level for first render pass
     });
+  }
+
+  static restoreOriginalData(chart: Chart): boolean {
+    let updated = false;
+
+    chart.data.datasets.forEach((dataset: MipMapDataSets) => {
+      if (
+        !utils.isNil(dataset.originalData) &&
+        dataset.data !== dataset.originalData
+      ) {
+        dataset.data = dataset.originalData;
+        updated = true;
+      }
+    });
+
+    return updated;
   }
 
   static getTargetResolution(chart: Chart, options: ResponsiveDownsamplePluginOptions): number {
@@ -145,7 +161,13 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
 
   beforeDatasetsUpdate(chart: Chart): void {
     const options = ResponsiveDownsamplePlugin.getPluginOptions(chart);
-    if (!options.enabled) { return; }
+    if (!options.enabled) {
+      // restore original data and remove state from options
+      options.needsUpdate = ResponsiveDownsamplePlugin.restoreOriginalData(chart);
+      delete options.targetResolution;
+      delete options.scaleRange;
+      return;
+    }
 
     // only update mip map if data set was reloaded externally
     if (ResponsiveDownsamplePlugin.hasDataChanged(chart)) {
@@ -156,7 +178,16 @@ export class ResponsiveDownsamplePlugin implements IChartPlugin {
 
   beforeRender(chart: Chart): boolean {
     const options = ResponsiveDownsamplePlugin.getPluginOptions(chart);
-    if (!options.enabled) { return; }
+    if (!options.enabled) {
+      // update chart if data was restored from original data
+      if (options.needsUpdate) {
+        options.needsUpdate = false;
+        chart.update(0);
+
+        return false;
+      }
+      return;
+    }
 
     const targetResolution = ResponsiveDownsamplePlugin.getTargetResolution(chart, options);
     const xScale: TimeScale = (chart as any).scales["x-axis-0"];

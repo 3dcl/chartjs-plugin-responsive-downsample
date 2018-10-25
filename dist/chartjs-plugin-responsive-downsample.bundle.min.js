@@ -49,7 +49,7 @@ function cullData(data, range) {
     var endIndex = data.length;
     for (var i = 1; i < data.length; ++i) {
         var point = data[i];
-        var compareValue = getCompareValue(point.x);
+        var compareValue = getCompareValue(point.x || point.t);
         if (compareValue <= startValue) {
             startIndex = i;
         }
@@ -188,19 +188,20 @@ var DataMipmap = /** @class */ (function () {
             .reduce(function (previous, current) { return previous + current; })
             / aggregationValues.length;
         return {
-            x: aggregationValues[0].x,
+            x: aggregationValues[0].x || aggregationValues[0].t,
             y: value
         };
     };
     DataMipmap.prototype.getTime = function (point) {
-        if (typeof point.x === "number") {
-            return point.x;
+        var x = point.x || point.t;
+        if (typeof x === "number") {
+            return x;
         }
-        else if (typeof point.x === "string") {
-            return new Date(point.x).getTime();
+        else if (typeof x === "string") {
+            return new Date(x).getTime();
         }
         else {
-            return point.x.getTime();
+            return x.getTime();
         }
     };
     return DataMipmap;

@@ -71,6 +71,15 @@ describe('DataMipMap', function () {
             checkMipMaps(mipMapLevel);
         });
 
+        it('should work with data where the x value is stored in t', function () {
+            const testDataWithT = testData.map((point) => ({ t: point.x, y: point.y }));
+            const mipMap = new LTTBDataMipmap(testDataWithT, 100);
+            const mipMapLevel = mipMap.getMipMaps();
+
+            expect(mipMapLevel).to.have.length(2);
+            checkMipMaps(mipMapLevel);
+        });
+
         it('should handle an empty dataset', function () {
             const mipMap = new LTTBDataMipmap([]);
             const mipMapLevel = mipMap.getMipMaps();

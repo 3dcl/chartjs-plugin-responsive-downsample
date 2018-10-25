@@ -150,23 +150,25 @@ export class DataMipmap {
 
   protected getAverage(aggregationValues: ChartPoint[]): ChartPoint {
     const value = aggregationValues
-      .map(point => point.y)
+      .map(point => point.y as number)
       .reduce((previous, current) => previous + current)
       / aggregationValues.length;
 
     return {
-      x: aggregationValues[0].x,
+      x: aggregationValues[0].x || aggregationValues[0].t,
       y: value
     };
   }
 
   protected getTime(point: ChartPoint): number {
-    if (typeof point.x === "number") {
-      return point.x;
-    } else if (typeof point.x === "string") {
-      return new Date(point.x).getTime();
+    const x = point.x || point.t;
+
+    if (typeof x === "number") {
+      return x;
+    } else if (typeof x === "string") {
+      return new Date(x).getTime();
     } else {
-      return point.x.getTime();
+      return x.getTime();
     }
   }
 }

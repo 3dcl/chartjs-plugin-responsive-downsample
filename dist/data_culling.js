@@ -46,7 +46,7 @@ function cullData(data, range) {
     var endIndex = data.length;
     for (var i = 1; i < data.length; ++i) {
         var point = data[i];
-        var compareValue = getCompareValue(point.x);
+        var compareValue = getCompareValue(point.x || point.t);
         if (compareValue <= startValue) {
             startIndex = i;
         }

@@ -53,7 +53,7 @@ export function cullData(data: ChartPoint[], range: Range): ChartPoint[] {
 
     for (let i = 1; i < data.length; ++i) {
         const point = data[i];
-        const compareValue = getCompareValue(point.x);
+        const compareValue = getCompareValue(point.x || point.t);
 
         if (compareValue <= startValue) {
             startIndex = i;

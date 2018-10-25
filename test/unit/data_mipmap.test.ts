@@ -18,7 +18,7 @@ describe('DataMipMap', function () {
         mipmaps.forEach((level) => {
             let lastPoint = level[0];
             for (let i = 1; i < level.length; ++i) {
-                expect(new Date(level[i].x as string).getTime() - new Date(lastPoint.x as string).getTime())
+                expect(new Date(level[i].x || level[i].t as string).getTime() - new Date(lastPoint.x || lastPoint.t as string).getTime())
                     .to.be.gte(resolution);
                 lastPoint = level[i];
             }
@@ -70,6 +70,15 @@ describe('DataMipMap', function () {
 
         it('should downsample diagram data with mininmal number of points', function () {
             const mipMap = new DataMipmap(testData, 100);
+            const mipMapLevel = mipMap.getMipMaps();
+
+            expect(mipMapLevel).to.have.length(2);
+            checkMipMaps(mipMapLevel, 60000);
+        });
+
+        it('should work with data where the x value is stored in t', function () {
+            const testDataWithT = testData.map((point) => ({ t: point.x, y: point.y }));
+            const mipMap = new DataMipmap(testDataWithT, 100);
             const mipMapLevel = mipMap.getMipMaps();
 
             expect(mipMapLevel).to.have.length(2);

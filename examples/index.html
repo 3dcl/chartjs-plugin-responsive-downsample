@@ -16,24 +16,26 @@
         </div>
     </div>
     <script>
-        function generateData(fn, count) {
+        function generateData(fn, count, xAttribute) {
+            xAttribute = xAttribute || 'x';
             var output = [];
             var startDate = new Date("2018-01-01T12:00:00.000Z");
 
             for (var i = 0; i < count; ++i) {
-                output.push({
-                    x: new Date(startDate.getTime() + i * 1000).toISOString(),
+                var point = {
                     y: fn((i * 4 * Math.PI) / count)
-                });
+                };
+                point[xAttribute] = new Date(startDate.getTime() + i * 1000).toISOString();
+                output.push(point);
             }
 
             return output;
         }
 
-        function generateDataSet(name, color, fn, count) {
+        function generateDataSet(name, color, fn, count, xAttribute) {
             return {
                 label: name,
-                data: generateData(fn, count),
+                data: generateData(fn, count, xAttribute),
                 borderColor: color,
                 backgroundColor: color,
                 borderWidth: 2,
@@ -46,7 +48,7 @@
             data: {
                 datasets: [
                     generateDataSet("sin", "#1ab394", Math.sin, 100000),
-                    generateDataSet("cos", "#d73a49", Math.cos, 100000)
+                    generateDataSet("cos", "#d73a49", Math.cos, 100000, 't')
                 ]
             },
             options: {

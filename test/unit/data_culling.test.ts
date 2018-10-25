@@ -101,5 +101,20 @@ describe('ResponsiveDownsamplePlugin', function () {
                 expect(date <= endDate).to.be.equal(true, `Expected "${date}" to be before or equal to "${endDate}"`);
             });
         });
+
+        it('should work with data where the x value is stored in t', function () {
+            const testDataWithT = testData.map((point) => ({ t: point.x, y: point.y }));
+            const startDate = new Date("2018-01-01T12:15:00.000Z");
+            const endDate = new Date("2018-01-01T12:20:00.000Z");
+            const culledData = data_culling.cullData(testDataWithT, [startDate, endDate]);
+
+            expect(culledData).to.have.length(6);
+            culledData.forEach((point) => {
+                const date = new Date(point.t);
+                expect(testDataWithT).to.include(point);
+                expect(date >= startDate).to.be.equal(true, `Expected "${date}" to be after or equal to "${startDate}"`);
+                expect(date <= endDate).to.be.equal(true, `Expected "${date}" to be before or equal to "${endDate}"`);
+            });
+        });
     });
 });

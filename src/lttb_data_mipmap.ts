@@ -82,7 +82,7 @@ export class LTTBDataMipmap extends DataMipmap {
 
             for (; avgRangeStart < avgRangeEnd; avgRangeStart++) {
                 avgX += this.getTime(data[avgRangeStart]);
-                avgY += data[avgRangeStart].y * 1;
+                avgY += data[avgRangeStart].y as number * 1;
             }
             avgX /= avgRangeLength;
             avgY /= avgRangeLength;
@@ -94,13 +94,13 @@ export class LTTBDataMipmap extends DataMipmap {
             // Point a
             const pointA = data[a];
             const pointAX = this.getTime(pointA);
-            const pointAY = pointA.y * 1;
+            const pointAY = pointA.y as number * 1;
 
             maxArea = area = -1;
 
             for (; rangeOffs < rangeTo; rangeOffs++) {
                 // Calculate triangle area over three buckets
-                area = Math.abs((pointAX - avgX) * (data[rangeOffs].y - pointAY) -
+                area = Math.abs((pointAX - avgX) * (data[rangeOffs].y as number - pointAY) -
                     (pointAX - this.getTime(data[rangeOffs])) * (avgY - pointAY)
                 ) * 0.5;
 

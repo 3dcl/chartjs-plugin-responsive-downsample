@@ -7,6 +7,12 @@ The plugin creates a mipmap-like data structure from line chart data and dynamic
 
 Inspired by: [AlbinoDrought/chartjs-plugin-downsample](https://github.com/AlbinoDrought/chartjs-plugin-downsample)
 
+### Installation
+
+```bash
+$ npm install chartjs-plugin-responsive-downsample
+```
+
 ### Configuration
 ```javascript
 {

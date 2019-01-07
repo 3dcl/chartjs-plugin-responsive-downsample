@@ -1,4 +1,3 @@
-/// <reference types="chart.js" />
 import { ChartPoint } from 'chart.js';
 import { DataMipmap } from './data_mipmap';
 /**

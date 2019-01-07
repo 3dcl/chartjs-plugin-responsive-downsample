@@ -1,4 +1,3 @@
-/// <reference types="chart.js" />
 import { ChartPoint } from 'chart.js';
 import { Scale } from './chartjs_ext';
 import moment_module = require('moment');

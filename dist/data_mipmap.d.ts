@@ -1,4 +1,3 @@
-/// <reference types="chart.js" />
 import { ChartPoint } from 'chart.js';
 /**
  * A mipmap data structure for line chart data. Uses averages to downsample data.

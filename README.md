@@ -18,28 +18,40 @@ $ npm install chartjs-plugin-responsive-downsample
 {
     options: {
         responsiveDownsample: {
-            enabled: true,
             /**
-             * Choose aggregation algorithm 'AVG'(Average values) or
-             * 'LTTB' (Largest-Triangle-Three-Buckets). Default: 'LTTB'
+            * Enable/disable plugin
              */
-            aggregationAlgorithm: 'LTTB',
+            enabled?: boolean;
             /**
-             * The desired minimal distance between data points in pixels.
-             * The plugin downsamples the data and tries to match this threshold.
-             * Default: 1 pixel
+             * The aggregation algorithm to thin out data. Default: LTTB
              */
-            desiredDataPointDistance: 1,
+            aggregationAlgorithm?: 'AVG' | 'LTTB';
             /**
-             * The minimal number of data points. The chart data is not downsampled further than
-             * this threshold. Default: 100
+             * Desired mininmal distance between data points in pixels. Default: 1 pixel
              */
-            minNumPoints: 100,
-             /**
-              * Cull data to displayed range of x scale. Default: true
-              */
-            cullData: boolean;
+            desiredDataPointDistance?: number;
+            /**
+             * Minimal number of data points. Limits
+             */
+            minNumPoints?: number;
+            /**
+             * Cull data to displayed range of x scale
+             */
+            cullData?: boolean;
+            /**
+             * Flag is set by plugin to trigger reload of data
+             */
+            needsUpdate?: boolean;
+            /**
+             * Current target resolution(Set by plugin)
+             */
+            targetResolution?: number;
+            /**
+             * Scale range of x axis
+             */
+            scaleRange?: data_culling.Range;
         }
     }
 }
+
 ```

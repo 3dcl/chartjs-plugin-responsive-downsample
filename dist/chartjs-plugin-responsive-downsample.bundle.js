@@ -16,8 +16,8 @@ function getCompareValue(value) {
     else if (value instanceof Date) {
         return value.getTime();
     }
-    else {
-        return moment(value).toDate().getTime();
+    else { // moment value, return unix time in ms
+        return value.valueOf();
     }
 }
 function rangeIsEqual(previousValue, currentValue) {
@@ -38,7 +38,11 @@ function getScaleRange(scale) {
     if (utils.isNil(scale))
         return [null, null];
     var start = scale.getValueForPixel(scale.left);
+    if(start._isAMomentObject != null) // check if it is a moment object
+        start = start.valueOf();    // old way to be compliant with chartjs.bundle
     var end = scale.getValueForPixel(scale.right);
+    if(end._isAMomentObject != null)
+        end = end.valueOf();
     return [start, end];
 }
 exports.getScaleRange = getScaleRange;
@@ -406,8 +410,9 @@ var ResponsiveDownsamplePlugin = /** @class */ (function () {
         var xScale = chart.scales["x-axis-0"];
         if (utils.isNil(xScale))
             return null;
-        var start = moment(xScale.getValueForPixel(xScale.left));
-        var end = moment(xScale.getValueForPixel(xScale.left + 1));
+        // start and end are already moment object in chartjs
+        var start = xScale.getValueForPixel(xScale.left);
+        var end = xScale.getValueForPixel(xScale.left + 1);
         var targetResolution = end.diff(start);
         return targetResolution * options.desiredDataPointDistance;
     };

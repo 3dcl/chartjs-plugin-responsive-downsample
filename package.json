@@ -37,8 +37,8 @@
     "browserify": "^16.2.3",
     "chai": "^4.2.0",
     "chai-datetime": "^1.5.0",
-    "mocha": "^5.2.0",
-    "nyc": "^12.0.2",
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
     "ts-node": "^5.0.1",
     "tsify": "^3.0.4",
     "uglifyify": "^4.0.5"

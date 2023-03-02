@@ -41,7 +41,7 @@
     "nyc": "^15.1.0",
     "ts-node": "^5.0.1",
     "tsify": "^3.0.4",
-    "uglifyify": "^4.0.5"
+    "uglifyify": "^5.0.2"
   },
   "nyc": {
     "include": [
